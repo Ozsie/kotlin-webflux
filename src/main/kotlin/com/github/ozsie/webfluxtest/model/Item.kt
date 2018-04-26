@@ -1,5 +1,7 @@
 package com.github.ozsie.webfluxtest.model
 
-import org.springframework.data.annotation.Id
+//import org.springframework.data.annotation.Id
+import java.io.Serializable
+import java.util.*
 
-data class Item(@Id val id: String?, val value: String)
+data class Item(val id: String = UUID.randomUUID().toString(), val value: String) : Serializable

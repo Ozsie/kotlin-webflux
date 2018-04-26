@@ -1,6 +1,7 @@
 package com.github.ozsie.webfluxtest
 
 import com.github.ozsie.webfluxtest.model.Item
+import com.hazelcast.core.IMap
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,25 +21,24 @@ class WebfluxTestApplicationTests {
 	private var expectedList: MutableList<Item> = mutableListOf()
 
 	@Autowired
-	private lateinit var repository: ItemRepository
+	private lateinit var repository: IMap<String, Item>
 
 	@Autowired
 	private lateinit var routes: RouterFunction<*>
 
 	@BeforeEach
 	fun before() {
-        init(repository)
 		client = WebTestClient
 				.bindToRouterFunction(routes)
 				.configureClient()
 				.baseUrl("/api")
 				.build()
-        repository.findAll().collectList().block() ?: mutableListOf()
+        repository.values
 	}
 
 	@Test
 	fun testGetItems() {
-        expectedList = repository.findAll().collectList().block() ?: mutableListOf()
+        expectedList = repository.values as MutableList<Item>
 		client
                 .get()
 				.uri("/items")
@@ -51,8 +51,8 @@ class WebfluxTestApplicationTests {
 
     @Test
     fun testGetItem() {
-        expectedList = repository.findAll().collectList().block() ?: mutableListOf()
-        val item = expectedList[0]
+        expectedList = repository.values as MutableList<Item>
+        val item = expectedList.first()
         val x = client
                 .get()
                 .uri("/item/${item.id}")
