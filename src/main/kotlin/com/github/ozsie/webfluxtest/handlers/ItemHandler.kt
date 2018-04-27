@@ -2,11 +2,17 @@ package com.github.ozsie.webfluxtest.handlers
 
 import com.github.ozsie.webfluxtest.ItemRepository
 import com.github.ozsie.webfluxtest.model.Item
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 
-class ItemHandler(private val itemRepository: ItemRepository) {
+@Service
+class ItemHandler {
+
+    @Autowired
+    private lateinit var itemRepository: ItemRepository
 
     @Suppress("UNUSED_PARAMETER")
     fun getAllItems(request: ServerRequest) = ServerResponse.ok()
@@ -21,7 +27,9 @@ class ItemHandler(private val itemRepository: ItemRepository) {
     fun updateItem(request: ServerRequest) = request
             .bodyToMono(Item::class.java)
             .zipWith(this.itemRepository.findById(request.pathVariable("id")), { item, existingItem ->
-                Item(existingItem.id, item.value)
+                Item(existingItem.id, item.value).also {
+                    println("Updated ${it.id} with value = ${it.value}")
+                }
             })
             .flatMap(::saveAndRespond)
             .switchIfEmpty(ServerResponse.notFound().build())
