@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webflux
+  labels:
+    app: webflux
+spec:
+  selector:
+    matchLabels:
+      app: webflux
+  template:
+    metadata:
+      labels:
+        app: webflux
+    spec:
+      containers:
+      - image: webflux:latest
+        name: webflux
+        imagePullPolicy: Never
+        ports:
+         - name: http
+           containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: webflux
+spec:
+   type: NodePort
+   ports:
+     - port: 8080
+       protocol: TCP
+       targetPort: 8080
+   selector:
+     app: webflux
